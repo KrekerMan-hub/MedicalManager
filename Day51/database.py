@@ -4,6 +4,8 @@
 
 import sqlite3
 from pathlib import Path
+from models import Patient
+
 type PatientRow = tuple[int, str, int | None, str | None]
 
 DB_PATH = Path(__file__).parent/ "medical.db"
@@ -40,25 +42,27 @@ def get_patients() -> list[PatientRow]:
 
     cursor.execute("SELECT id, name, age, diagnosis FROM patients ORDER BY id;")
 
-    patients = cursor.fetchall()
+    rows = cursor.fetchall()
 
     connection.close()
 
-    return patients
+    return (Patient(*row) for row in rows)
 
-def get_patient_by_id(patient_id: int) -> PatientRow | None:
+def get_patient_by_id(patient_id: int) -> Patient | None:
     connection = sqlite3.connect(DB_PATH)
     cursor = connection.cursor()
 
     cursor.execute("SELECT id, name, age, diagnosis FROM patients WHERE id = ?",
                    (patient_id,))
 
-    patient = cursor.fetchone()
+    row = cursor.fetchone()
 
     connection.close()
 
+    if row is None:
+        return None
+    return Patient(*row)
     
-    return patient
 
 def update_diagnosis(patient_id: int, new_diagnosis: str) -> bool:
     connection = sqlite3.connect(DB_PATH)

@@ -24,8 +24,8 @@ def main():
             if not patients:
                 print("Список пациентов пуст.")
             else:
-                for patient_id, name, age, diagnosis in patients:
-                    print(f"ID: {patient_id} | Имя: {name}, возраст: {age}\nДиагноз: {diagnosis}\n")
+                for patient in patients:
+                    print(f"ID: {patient.id} | Имя: {patient.name}, возраст: {patient.age}\nДиагноз: {patient.diagnosis}\n")
 
         #Добавит пациента
         elif choice == "2":
@@ -59,7 +59,7 @@ def main():
             if patient is None:
                 print("Пациент не найден.")
             else:
-                print(f"ID: {patient[0]} | Имя: {patient[1]}, возраст: {patient[2]}\nДиагноз: {patient[3]}\n")
+                print(f"ID: {patient.id} | Имя: {patient.name}, возраст: {patient.age}\nДиагноз: {patient.diagnosis}\n")
 
 
         # Изменить диагноз
@@ -73,7 +73,7 @@ def main():
             if patient is None:
                 print("Пациент не найден.")
             else:
-                print(f"Текущий диагноз: {patient[3]}\n")
+                print(f"Текущий диагноз: {patient.diagnosis}\n")
                 new_diagnosis = input("Введите новый диагноз: ").strip()
                 if not new_diagnosis:
                     print("Диагноз не может быть пустым.")
@@ -95,7 +95,7 @@ def main():
             if patient is None:
                 print("Пациент не найден.")
             else:
-                confirmation = input(f"Удалить пациента: {patient[1]}? Введите «да»/«нет»: ").strip().lower()
+                confirmation = input(f"Удалить пациента: {patient.name}? Введите «да»/«нет»: ").strip().lower()
                 if confirmation != "да":
                     print("Удаление отменено.")
                     continue
