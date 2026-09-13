@@ -4,10 +4,11 @@
 
 import sqlite3
 from pathlib import Path
+type PatientRow = tuple[int, str, int | None, str | None]
 
 DB_PATH = Path(__file__).parent/ "medical.db"
 
-def init_db():
+def init_db() -> None:
     connection = sqlite3.connect(DB_PATH)
     cursor = connection.cursor()
 
@@ -23,7 +24,7 @@ def init_db():
     connection.commit()
     connection.close()
 
-def add_patient(name, age, diagnosis):
+def add_patient(name: str, age: int, diagnosis: str) -> None:
     connection = sqlite3.connect(DB_PATH)
     cursor = connection.cursor()
 
@@ -33,7 +34,7 @@ def add_patient(name, age, diagnosis):
     connection.commit()
     connection.close()
 
-def get_patients():
+def get_patients() -> list[PatientRow]:
     connection = sqlite3.connect(DB_PATH)
     cursor = connection.cursor()
 
@@ -45,7 +46,7 @@ def get_patients():
 
     return patients
 
-def get_patient_by_id(patient_id):
+def get_patient_by_id(patient_id: int) -> PatientRow | None:
     connection = sqlite3.connect(DB_PATH)
     cursor = connection.cursor()
 
@@ -59,7 +60,7 @@ def get_patient_by_id(patient_id):
     
     return patient
 
-def update_diagnosis(patient_id, new_diagnosis):
+def update_diagnosis(patient_id: int, new_diagnosis: str) -> bool:
     connection = sqlite3.connect(DB_PATH)
     cursor = connection.cursor()
 
@@ -74,7 +75,7 @@ def update_diagnosis(patient_id, new_diagnosis):
 
     return update > 0
 
-def delete_patient(patient_id):
+def delete_patient(patient_id: int) -> bool:
     connection = sqlite3.connect(DB_PATH)
     cursor = connection.cursor()
 
@@ -92,9 +93,3 @@ def delete_patient(patient_id):
 
 if __name__ == "__main__":
     init_db()
-
-    test_id = get_patients()[-1][0]
-
-    print(delete_patient(test_id))
-    print(get_patient_by_id(test_id))
-    print(delete_patient(test_id))
