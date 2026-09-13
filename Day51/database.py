@@ -6,7 +6,6 @@ import sqlite3
 from pathlib import Path
 from models import Patient
 
-type PatientRow = tuple[int, str, int | None, str | None]
 
 DB_PATH = Path(__file__).parent/ "medical.db"
 
@@ -36,7 +35,7 @@ def add_patient(name: str, age: int, diagnosis: str) -> None:
     connection.commit()
     connection.close()
 
-def get_patients() -> list[PatientRow]:
+def get_patients() -> list[Patient]:
     connection = sqlite3.connect(DB_PATH)
     cursor = connection.cursor()
 
@@ -46,7 +45,7 @@ def get_patients() -> list[PatientRow]:
 
     connection.close()
 
-    return (Patient(*row) for row in rows)
+    return [Patient(*row) for row in rows]
 
 def get_patient_by_id(patient_id: int) -> Patient | None:
     connection = sqlite3.connect(DB_PATH)
