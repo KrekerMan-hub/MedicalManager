@@ -9,54 +9,60 @@ from models import Patient
 
 DB_PATH = Path(__file__).parent/ "medical.db"
 
+class DatabaseConnection:
+    def __enter__(self):
+        self.connection = sqlite3.connect(DB_PATH)
+        return self.connection
+
+    def __exit__(self, exc_type, exc, tb):
+        try:
+            if exc_type is None:
+                self.connection.commit()
+            else:
+                self.connection.rollback()
+        finally:
+            self.connection.close()
+
+
 def init_db() -> None:
-    connection = sqlite3.connect(DB_PATH)
-    cursor = connection.cursor()
+    with DatabaseConnection() as connection:
+        cursor = connection.cursor()
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS patients (
-            id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL,
-            age INTEGER,
-            diagnosis TEXT
-        );
-    """)
-
-    connection.commit()
-    connection.close()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS patients (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                age INTEGER,
+                diagnosis TEXT
+            );
+        """)
 
 def add_patient(name: str, age: int, diagnosis: str) -> None:
-    connection = sqlite3.connect(DB_PATH)
-    cursor = connection.cursor()
+    with DatabaseConnection() as connection:
+        cursor = connection.cursor()
 
-    cursor.execute("INSERT INTO patients (name, age, diagnosis) VALUES (?, ?, ?);",
+        cursor.execute("INSERT INTO patients (name, age, diagnosis) VALUES (?, ?, ?);",
                         (name, age, diagnosis))
-
-    connection.commit()
-    connection.close()
+        
 
 def get_patients() -> list[Patient]:
-    connection = sqlite3.connect(DB_PATH)
-    cursor = connection.cursor()
+    with DatabaseConnection() as connection:
+        cursor = connection.cursor()
 
-    cursor.execute("SELECT id, name, age, diagnosis FROM patients ORDER BY id;")
+        cursor.execute("SELECT id, name, age, diagnosis FROM patients ORDER BY id;")
 
-    rows = cursor.fetchall()
-
-    connection.close()
+        rows = cursor.fetchall()
 
     return [Patient(*row) for row in rows]
 
 def get_patient_by_id(patient_id: int) -> Patient | None:
-    connection = sqlite3.connect(DB_PATH)
-    cursor = connection.cursor()
+    with DatabaseConnection() as connection:
+        cursor = connection.cursor()
 
-    cursor.execute("SELECT id, name, age, diagnosis FROM patients WHERE id = ?",
+        cursor.execute("SELECT id, name, age, diagnosis FROM patients WHERE id = ?",
                    (patient_id,))
 
-    row = cursor.fetchone()
-
-    connection.close()
+        row = cursor.fetchone()
 
     if row is None:
         return None
@@ -64,32 +70,24 @@ def get_patient_by_id(patient_id: int) -> Patient | None:
     
 
 def update_diagnosis(patient_id: int, new_diagnosis: str) -> bool:
-    connection = sqlite3.connect(DB_PATH)
-    cursor = connection.cursor()
+    with DatabaseConnection() as connection:
+        cursor = connection.cursor()
 
-    cursor.execute("UPDATE patients SET diagnosis = ? WHERE id = ?;",
+        cursor.execute("UPDATE patients SET diagnosis = ? WHERE id = ?;",
                    (new_diagnosis, patient_id))
 
-    connection.commit()
-
-    update = cursor.rowcount
+        update = cursor.rowcount
     
-    connection.close()
-
     return update > 0
 
 def delete_patient(patient_id: int) -> bool:
-    connection = sqlite3.connect(DB_PATH)
-    cursor = connection.cursor()
+    with DatabaseConnection() as connection:
+        cursor = connection.cursor()
 
-    cursor.execute("DELETE FROM patients WHERE id = ?;",
+        cursor.execute("DELETE FROM patients WHERE id = ?;",
                    (patient_id,))
 
-    connection.commit()
-
-    deleted = cursor.rowcount
-
-    connection.close()
+        deleted = cursor.rowcount
 
     return deleted > 0
 
